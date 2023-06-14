@@ -15,3 +15,5 @@ model = tf.keras.models.Sequential([
     tf.keras.layers.Dense(512, activation=tf.nn.relu),
     tf.keras.layers.Dense(10, activation=tf.nn.softmax)    
 ])
+
+print(model.summary())
