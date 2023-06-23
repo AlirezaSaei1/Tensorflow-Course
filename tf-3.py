@@ -1,4 +1,13 @@
 import tensorflow as tf
+import tensorflow as tf
+
+# Load the Fashion MNIST dataset
+fmnist = tf.keras.datasets.fashion_mnist
+(training_images, training_labels), (test_images, test_labels) = fmnist.load_data()
+
+# Normalize the pixel values
+training_images = training_images / 255.0
+test_images = test_images / 255.0
 
 fmnist = tf.keras.datasets.fashion_mnist
 (x_train, y_train), (x_test, y_test) = fmnist.load_data()
@@ -17,3 +26,13 @@ model = tf.keras.models.Sequential([
 ])
 
 print(model.summary())
+
+model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+
+# Train the model
+print(f'\nMODEL TRAINING:')
+model.fit(training_images, training_labels, epochs=5)
+
+# Evaluate on the test set
+print(f'\nMODEL EVALUATION:')
+test_loss = model.evaluate(test_images, test_labels)
