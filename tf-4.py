@@ -1,7 +1,7 @@
 import tensorflow as tf
 from keras.preprocessing.image import ImageDataGenerator
 
-train_dir = ''
+train_dir = 'Images'
 train_data_gen = ImageDataGenerator(rescale=1./255)
 
 train_generator = train_data_gen.flow_from_directory(
@@ -11,7 +11,7 @@ train_generator = train_data_gen.flow_from_directory(
     class_mode = 'binary'
 )
 
-valid_dir = ''
+valid_dir = 'Images'
 valid_data_gen = ImageDataGenerator(rescale=1./255)
 
 valid_generator = valid_data_gen.flow_from_directory(
@@ -34,6 +34,7 @@ model = tf.keras.models.Sequential([
     tf.keras.layers.Dense(512, activation='relu'),
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
+
 
 model.compile(loss='binary_crossentropy',
               optimizer=tf.keras.optimizers.RMSprop(learning_rate=0.01),
