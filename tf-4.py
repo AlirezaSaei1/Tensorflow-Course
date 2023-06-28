@@ -39,3 +39,13 @@ model = tf.keras.models.Sequential([
 model.compile(loss='binary_crossentropy',
               optimizer=tf.keras.optimizers.RMSprop(learning_rate=0.01),
               metrics=['accuracy'])
+
+
+history = model.fit(
+    train_generator,
+    steps_per_epoch=8,
+    epochs=15,
+    validation_data=valid_generator,
+    validation_steps=8,
+    verbose=2
+)
