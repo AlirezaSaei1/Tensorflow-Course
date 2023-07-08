@@ -1,7 +1,7 @@
 # Transfer learning
 
 import os
-
+import tensorflow as tf
 from keras import layers
 from keras import Model
 
@@ -28,3 +28,13 @@ pretrained_model.summary()
 last_layer = pretrained_model.get_layer('mixed7')
 last_output = last_layer.output
 
+
+# Now lets define our model
+x = layers.Flatten()(last_output)
+x = layers.Dense(1024, activation='relu')(x)
+x = layers.Dense(1, activation='sigmoid')(x)
+
+model = Model(pretrained_model.input, x)
+model.compile(optimizer=tf.optimizers.RMSprop(learning_rate=0.0001),
+              loss= tf.losses.BinaryCrossentropy(),
+              metrics=['accuracy'])
