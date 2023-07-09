@@ -31,6 +31,7 @@ last_output = last_layer.output
 # Now lets define our model
 x = layers.Flatten()(last_output)
 x = layers.Dense(1024, activation='relu')(x)
+x = layers.Dropout(0.2)(x)
 x = layers.Dense(1, activation='sigmoid')(x)
 
 model = Model(pretrained_model.input, x)
