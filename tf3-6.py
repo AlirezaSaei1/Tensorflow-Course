@@ -4,7 +4,9 @@ from keras.preprocessing.text import Tokenizer
 
 sentences = [
     'I love my dog',
-    'I love my cat'
+    'I love my cat',
+    # Punctuation marks are stripped
+    'You love my dog!'
 ]
 
 tokenizer = Tokenizer(num_words=100)
