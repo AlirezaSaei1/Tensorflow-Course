@@ -12,7 +12,7 @@ sentences = [
 ]
 
 # When you don't know the number of words this will take the most frequent ones
-tokenizer = Tokenizer(num_words=100)
+tokenizer = Tokenizer(num_words=100, oov_token='<OOV>') # OOV == Out of Vocabulary
 tokenizer.fit_on_texts(sentences)
 word_idx = tokenizer.word_index
 print(f'Word Indicies:\n{word_idx}')
