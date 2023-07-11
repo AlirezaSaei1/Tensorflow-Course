@@ -15,7 +15,20 @@ sentences = [
 tokenizer = Tokenizer(num_words=100)
 tokenizer.fit_on_texts(sentences)
 word_idx = tokenizer.word_index
-print(word_idx)
+print(f'Word Indicies:\n{word_idx}')
 
 sequences = tokenizer.texts_to_sequences(sentences)
-print(sequences)
+print(f'Text to sequence:\n{sequences}')
+
+
+# Test sentences
+test_sentences = [
+    'I really love my dog',
+    'My dog loves your cat!'
+]
+
+test_sequences = tokenizer.texts_to_sequences(test_sentences)
+print(f'Test text to sequence:\n{test_sequences}')
+
+converted_sequences_to_text = tokenizer.sequences_to_texts(test_sequences)
+print(f'Test sequence to text:\n{converted_sequences_to_text}')
