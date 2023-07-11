@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow import keras
-from keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 sentences = [
     'I love my dog',
@@ -19,6 +20,13 @@ print(f'Word Indicies:\n{word_idx}')
 
 sequences = tokenizer.texts_to_sequences(sentences)
 print(f'Text to sequence:\n{sequences}')
+
+# Adds appropriate number of zeros before sentences to make the lengths uniform
+# padding (Default: pre) -->  where to add zeros, before or after sentences 
+# maxlen --> What will be max len of sequence (longer sentences will be truncated)
+# truncating (Default: pre) --> from where should the sentence loose the information
+padded = pad_sequences(sequences, padding='post', maxlen=5, truncating='post')
+print(f'Padded sequence:\n{padded}')
 
 
 # Test sentences
