@@ -1,69 +1,71 @@
+# Transfer learning
+
+import os
 import tensorflow as tf
-import matplotlib.pyplot as plt
+from keras import layers
+from keras import Model
+
+from keras.applications.inception_v3 import InceptionV3
+
+local_weights = ''
+
+pretrained_model = InceptionV3(input_shape=(150, 150, 3),
+                               include_top=False, # get straight to convolutions
+                               weights=None
+)
+
+pretrained_model.load_weights(local_weights)
+
+for layer in pretrained_model.layers:
+    layer.trainable = False
+
+# See the architectureo of model
+pretrained_model.summary()
 
 
-# Load the Fashion MNIST dataset
-fmnist = tf.keras.datasets.fashion_mnist
-(training_images, training_labels), (test_images, test_labels) = fmnist.load_data()
-
-# Normalize the pixel values
-training_images = training_images / 255.0
-test_images = test_images / 255.0
-
-fmnist = tf.keras.datasets.fashion_mnist
-(x_train, y_train), (x_test, y_test) = fmnist.load_data()
-
-x_train = x_train / 255.0
-x_test = x_test / 255.0
-
-model = tf.keras.models.Sequential([
-    tf.keras.layers.Conv2D(64, (3, 3), activation='relu', input_shape = (28, 28, 1)),
-    tf.keras.layers.MaxPooling2D(2, 2),
-
-    tf.keras.layers.Conv2D(64, (3, 3), activation='relu'),
-    tf.keras.layers.MaxPooling2D(2, 2),
-
-    tf.keras.layers.Flatten(),
-    tf.keras.layers.Dense(512, activation=tf.nn.relu),
-    tf.keras.layers.Dense(10, activation=tf.nn.softmax)    
-])
-
-model.summary()
-
-model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-
-# Train the model
-print(f'\nMODEL TRAINING:')
-model.fit(training_images, training_labels, epochs=5)
-
-# Evaluate on the test set
-print(f'\nMODEL EVALUATION:')
-test_loss = model.evaluate(test_images, test_labels)
+# Get layers with layer names
+last_layer = pretrained_model.get_layer('mixed7')
+last_output = last_layer.output
 
 
-#########################################################################
+# Now lets define our model
+x = layers.Flatten()(last_output)
+x = layers.Dense(1024, activation='relu')(x)
+x = layers.Dropout(0.2)(x)
+x = layers.Dense(1, activation='sigmoid')(x)
 
-print(test_labels[:100])
+model = Model(pretrained_model.input, x)
+model.compile(optimizer=tf.optimizers.RMSprop(learning_rate=0.0001),
+              loss= tf.losses.BinaryCrossentropy(),
+              metrics=['accuracy'])
 
-f, axarr = plt.subplots(3,4)
 
-FIRST_IMAGE=0
-SECOND_IMAGE=23
-THIRD_IMAGE=28
-CONVOLUTION_NUMBER = 1
+# ImageDataGenerator
+from keras.preprocessing.image import ImageDataGenerator
+train_datagen = ImageDataGenerator(rescale=1./255,
+                                     rotation_range=40,
+                                     width_shift_range=0.2,
+                                     height_shift_range=0.2,
+                                     zoom_range=0.2,
+                                     shear_range=0.2,
+                                     horizontal_flip=True)
 
-layer_outputs = [layer.output for layer in model.layers]
-activation_model = tf.keras.models.Model(inputs = model.input, outputs = layer_outputs)
 
-for x in range(0,4):
-  f1 = activation_model.predict(test_images[FIRST_IMAGE].reshape(1, 28, 28, 1))[x]
-  axarr[0,x].imshow(f1[0, : , :, CONVOLUTION_NUMBER], cmap='inferno')
-  axarr[0,x].grid(False)
-  
-  f2 = activation_model.predict(test_images[SECOND_IMAGE].reshape(1, 28, 28, 1))[x]
-  axarr[1,x].imshow(f2[0, : , :, CONVOLUTION_NUMBER], cmap='inferno')
-  axarr[1,x].grid(False)
-  
-  f3 = activation_model.predict(test_images[THIRD_IMAGE].reshape(1, 28, 28, 1))[x]
-  axarr[2,x].imshow(f3[0, : , :, CONVOLUTION_NUMBER], cmap='inferno')
-  axarr[2,x].grid(False)
+train_generator = train_datagen.flow_from_directory('training-dir',
+                                                    batch_size=20,
+                                                    class_mode='binary',
+                                                    target_size=(150, 150))
+
+
+validation_datagen = ImageDataGenerator(rescale=1./255)
+validation_generator = train_datagen.flow_from_directory('validation-dir',
+                                                    batch_size=20,
+                                                    class_mode='binary',
+                                                    target_size=(150, 150))
+
+history = model.fit(train_generator,
+                    validation_data=validation_generator,
+                    steps_per_epoch=100,
+                    epochs=100,
+                    validation_steps=50,
+                    verbose=2)
