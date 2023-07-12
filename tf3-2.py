@@ -29,7 +29,7 @@ tokenizer.fit_on_texts(sentences)
 word_index = tokenizer.word_index
 print(f'number of words in word_index: {len(word_index)}')
 
-# Print the word index
+# Print the word index --> This has lots of words that are not necessary like: to, with, of, etc. (We might get rid of them)
 print(f'word_index: {word_index}')
 print()
 
