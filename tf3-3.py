@@ -73,5 +73,16 @@ model = tf.keras.Sequential([
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
 
+
+model.compile(optimizer='binary_crossentropy',
+              loss='adam',
+              metrics=['accuracy'])
+
 model.summary()
 
+
+num_epochs = 10
+model.fit(padded,
+          training_labels_final,
+          epochs=num_epochs,
+          validation_data=(testing_padded, testing_labels_final))
