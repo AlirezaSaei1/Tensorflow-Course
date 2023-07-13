@@ -57,3 +57,21 @@ padded = pad_sequences(sequences, maxlen=max_length, truncating=trunc_type)
 # Apply the same to test sequences
 testing_sequences = tokenizer.texts_to_sequences(testing_sentences)
 testing_padded = pad_sequences(testing_sequences, maxlen=max_length)
+
+
+# Now the NN part
+model = tf.keras.Sequential([
+    # For sentiments analysis - Use vectors to align words (e.g. 16-vector) with similar meaning to same direction
+    # Result is 2D-array with (length of  the sentence, embedding_dim) -> Must be flattened
+    tf.keras.layers.Embedding(vocab_size, embedding_dim, input_length=max_length), 
+
+    # Instead of Flatten we can use in NLP: tf.keras.layers.GlobalAveragePooling1D() --> Reason: Size of the output vector
+    # Flatten --> More accurate, More time to run
+    # GlobalAveragePooling1D --> Less accurate, Less time to run
+    tf.keras.layers.Flatten(), 
+    tf.keras.layers.Dense(6, activation='relu'),
+    tf.keras.layers.Dense(1, activation='sigmoid')
+])
+
+model.summary()
+
