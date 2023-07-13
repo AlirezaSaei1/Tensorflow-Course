@@ -4,6 +4,7 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 import tensorflow_datasets as tfds
 import numpy as np
+import io
 
 # Print version of tf library
 print(tf.__version__)
@@ -86,3 +87,21 @@ model.fit(padded,
           training_labels_final,
           epochs=num_epochs,
           validation_data=(testing_padded, testing_labels_final))
+
+
+# Cheking embedding layer
+e = model.layers[0]
+weights = e.get_weights()[0]
+print(weights.shape) # size: (vocab_size, embedding_dim)
+
+reversed_word_index = tokenizer.index_word
+
+out_v = io.open('vecs.tsv', 'w', encoding='utf-8')
+out_m = io.open('meta.tsv', 'w', encoding='utf-8')
+for word_num in range(1, vocab_size):
+    word = reversed_word_index[word_num]
+    embeddings = weights[word_num]
+    out_m.write(word + "\n")
+    out_v.write('\t'.join([str(x) for x in embeddings]) + "\n")
+out_v.close()
+out_m.close()
