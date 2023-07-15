@@ -13,6 +13,8 @@ print(tf.__version__)
 tfds.list_builders()
 
 # Load imdb_reviews datasets
+# NOTE: Another one --> 'imdb_reviews/subwords8k' --> can get pretokenized tokenizer with info.features['text'].encoder
+# Subwords do not ignore punctuations and divides words into sub parts
 imdb, info = tfds.load('imdb_reviews', with_info=True, as_supervised=True)
 
 # 25K train sample & 25K test sample
