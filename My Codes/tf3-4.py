@@ -30,11 +30,20 @@ lstm1_dim = 64
 lstm2_dim = 32
 dense_dim = 64
 
+filters = 128
+kernel_size = 5
+
+
 # Build the model - Model with 2 LSTMs worked better
 model = tf.keras.Sequential([
     tf.keras.layers.Embedding(tokenizer.vocab_size, embedding_dim),
+
+    # tf.keras.layers.Conv1D(filters=filters, kernel_size=kernel_size, activation='relu'),
+    # tf.keras.layers.GlobalMaxPooling1D(),
+
     tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(lstm1_dim, return_sequences=True)), 
     tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(lstm2_dim)),
+
     tf.keras.layers.Dense(dense_dim, activation='relu'),
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
