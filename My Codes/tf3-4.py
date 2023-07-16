@@ -24,17 +24,17 @@ train_dataset = train_dataset.padded_batch(BATCH_SIZE)
 test_dataset = test_data.padded_batch(BATCH_SIZE)
 
 
-import tensorflow as tf
-
 # Hyperparameters
 embedding_dim = 64
-lstm_dim = 64
+lstm1_dim = 64
+lstm2_dim = 32
 dense_dim = 64
 
-# Build the model
+# Build the model - Model with 2 LSTMs worked better
 model = tf.keras.Sequential([
     tf.keras.layers.Embedding(tokenizer.vocab_size, embedding_dim),
-    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(lstm_dim)),
+    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(lstm1_dim, return_sequences=True)), 
+    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(lstm2_dim)),
     tf.keras.layers.Dense(dense_dim, activation='relu'),
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
@@ -62,3 +62,5 @@ def plot_graphs(history, string):
 # Plot the accuracy and results 
 plot_graphs(history, "accuracy")
 plot_graphs(history, "loss")
+
+# NOTE: jagginess of graphs means network needs improvements
