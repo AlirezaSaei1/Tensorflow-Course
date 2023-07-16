@@ -48,6 +48,17 @@ model = tf.keras.Sequential([
     tf.keras.layers.Dense(1, activation='sigmoid')
 ])
 
+# --------------------------------------------------------------
+# Different layers
+# 1. Embedding-only (with Flatten): Fast (~5s/epoch) but overfits
+# 2. Embedding with LSTM: Slower (~43s/epoch) accuracy is better but still overfits
+# 3. Embedding with GRU: Faster (~20s/epoch) accuracy is good (both train and test) still overfits 
+# 4. Embedding with Conv: Faster (~6s/epoch) with good accuracy but still overfits
+
+# Over fitting has hight probability in texts becuase of OOVs
+# But we can use dropouts and mixture of above models to avoid overfitting
+# --------------------------------------------------------------
+
 # Print the model summary
 model.summary()
 
