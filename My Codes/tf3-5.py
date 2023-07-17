@@ -16,3 +16,14 @@ tokenizer = Tokenizer(oov_token=oov_token)
 tokenizer.fit_on_texts(corpus)
 print(f'Length including OOV: {len(tokenizer.word_index)}')
 print(tokenizer.word_index)
+
+
+# Build texts
+input_sequences = []
+for line in corpus:
+    token_list = tokenizer.texts_to_sequences([line])[0]
+    for i in range(1, len(token_list)):
+        n_seq = token_list[:i+1]
+        input_sequences.append(n_seq)
+
+print(input_sequences)
