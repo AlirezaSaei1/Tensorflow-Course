@@ -58,3 +58,10 @@ model.summary()
 
 # Train the model
 history = model.fit(xs, ys, epochs=500)
+
+
+# Plot history
+plt.plot(history.history['accuracy'])
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
+plt.show()
