@@ -65,3 +65,16 @@ plt.plot(history.history['accuracy'])
 plt.xlabel('Epochs')
 plt.ylabel('Accuracy')
 plt.show()
+
+
+seed = 'Alireza is the best guy'
+no_of_predictions = 10
+
+for _ in range(no_of_predictions):
+	token_list = tokenizer.texts_to_sequences([seed])[0]
+	token_list = pad_sequences([token_list], maxlen=max_sequence_len-1, padding='pre')
+	probabilities = model.predict(token_list)
+	predicted = np.argmax(probabilities, axis=-1)[0]
+	seed += ' ' + tokenizer.index_word[predicted]
+	
+print(seed)
