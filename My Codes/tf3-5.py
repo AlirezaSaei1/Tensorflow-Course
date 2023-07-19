@@ -2,7 +2,9 @@
 
 # Import required libraries
 import tensorflow as tf
-import numpy as np
+import numpy as np 
+from tensorflow.keras.layers import Embedding, LSTM, Dense, Bidirectional
+from tensorflow.keras.models import Sequential
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
@@ -13,11 +15,12 @@ corpus = data.lower().split('\n')
 
 
 # Tokenizer
-oov_token = '<OOV>'
-tokenizer = Tokenizer(oov_token=oov_token)
+tokenizer = Tokenizer()
 tokenizer.fit_on_texts(corpus)
-print(f'Length including OOV: {len(tokenizer.word_index)}')
-print(tokenizer.word_index)
+
+total_words = len(tokenizer.word_index) + 1
+print(f'word index dictionary: {tokenizer.word_index}')
+print(f'total words: {total_words}')
 
 
 # Build texts
@@ -38,5 +41,24 @@ padded_sequence = np.array(pad_sequences(input_sequences, maxlen=max_seq_len, pa
 # Turn padded sequences into Xs and Ys
 inputs = padded_sequence[:,:-1]
 labels = padded_sequence[:,-1]
+
+# Convert the label into one-hot arrays
+ys = tf.keras.utils.to_categorical(labels, num_classes=total_words)
+
+# Build the model
+model = Sequential([
+          Embedding(total_words, 64, input_length=max_seq_len-1),
+          Bidirectional(LSTM(20)),
+          Dense(total_words, activation='softmax')
+])
+
+# Use categorical crossentropy because this is a multi-class problem
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+# Print the model summary
+model.summary()
+
+# Train the model
+history = model.fit(inputs, ys, epochs=500)
 
 
