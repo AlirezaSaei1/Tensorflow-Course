@@ -2,7 +2,9 @@
 
 # Import required libraries
 import tensorflow as tf
+import numpy as np
 from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 
 # Data
@@ -27,3 +29,14 @@ for line in corpus:
         input_sequences.append(n_seq)
 
 print(input_sequences)
+
+# Padd sequences so they have same lengths
+max_seq_len = max([len(x) for x in input_sequences])
+padded_sequence = np.array(pad_sequences(input_sequences, maxlen=max_seq_len, padding='pre'))
+
+
+# Turn padded sequences into Xs and Ys
+inputs = padded_sequence[:,:-1]
+labels = padded_sequence[:,-1]
+
+
