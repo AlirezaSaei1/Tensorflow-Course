@@ -51,6 +51,14 @@ def noise(time, noise_level=1, seed=None):
     return noise
 
 
+# Function to calculate moving average
+def moving_average_forecast(series, window_size):
+    forecast = []
+    for time in range(len(series) - window_size):
+        forecast.append(series[time:time + window_size].mean())
+    return np.array(forecast)
+
+
 # Parameters
 time = np.arange(4 * 365 + 1, dtype="float32")
 baseline = 10
