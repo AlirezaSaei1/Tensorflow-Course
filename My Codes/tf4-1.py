@@ -66,3 +66,29 @@ series += noise(time, noise_level, seed=42)
 
 # Plot the results
 plot_series(time, series)
+
+# Define the split time
+split_time = 1000
+
+# Get the train set 
+time_train = time[:split_time]
+x_train = series[:split_time]
+
+# Get the validation set
+time_valid = time[split_time:]
+x_valid = series[split_time:]
+
+
+# -------------- Forecasting --------------
+# Naive method
+naive_forecast = series[split_time - 1:-1]
+
+# Define time step
+time_step = 100
+
+# Print values
+print(f'ground truth at time step {time_step}: {x_valid[time_step]}')
+print(f'prediction at time step {time_step + 1}: {naive_forecast[time_step + 1]}')
+
+# Plot the results
+plot_series(time_valid, (x_valid, naive_forecast))
