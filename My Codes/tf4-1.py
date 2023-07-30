@@ -217,3 +217,33 @@ print(f'shape of series[0:20][np.newaxis]: {np.expand_dims(series[0:20], axis=0)
 
 # Sample model prediction
 print(f'model prediction: {model.predict(series[0:20][np.newaxis])}')
+
+
+# -------------- Forecasting --------------
+# Initialize a list
+forecast = []
+
+# Use the model to predict data points per window size
+for time in range(len(series) - window_size):
+  forecast.append(model.predict(series[time:time + window_size][np.newaxis]))
+
+# Slice the points that are aligned with the validation set
+forecast = forecast[split_time - window_size:]
+
+# Compare number of elements in the predictions and the validation set
+print(f'length of the forecast list: {len(forecast)}')
+print(f'shape of the validation set: {x_valid.shape}')
+
+# Preview shapes after using the conversion and squeeze methods
+print(f'shape after converting to numpy array: {np.array(forecast).shape}')
+print(f'shape after squeezing: {np.array(forecast).squeeze().shape}')
+
+# Convert to a numpy array and drop single dimensional axes
+results = np.array(forecast).squeeze()
+
+# Overlay the results with the validation set
+plot_series(time_valid, (x_valid, results))
+
+# Compute the metrics
+print(tf.keras.metrics.mean_squared_error(x_valid, results).numpy())
+print(tf.keras.metrics.mean_absolute_error(x_valid, results).numpy())
