@@ -15,17 +15,20 @@ for val in dataset:
 windows = dataset.window(5, shift=1)
 
 # Create widnows with fixed size
-windows = dataset.window(5, shift=1, drop_remainder=True)
-for window in windows:
+dataset = dataset.window(5, shift=1, drop_remainder=True)
+for window in dataset:
     for val in window:
         print(val.numpy(), end=" ")
     print('')
 
 
 # Flatten
-flat = windows.flat_map(lambda window: window.batch(5))
+dataset = dataset.flat_map(lambda window: window.batch(5))
 
 # SPlit data into features and labels
-splitted = flat.map(lambda window: (window[:-1], window[-1]))
-for x, y in splitted:
+dataset = dataset.map(lambda window: (window[:-1], window[-1]))
+
+# Shuffle data 
+dataset_shuffled = dataset.shuffle
+for x, y in dataset_shuffled(buffer_size=10):
     print(x.numpy(), y.numpy())
