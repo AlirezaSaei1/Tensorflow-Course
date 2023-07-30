@@ -137,3 +137,12 @@ diff_moving_avg_plus_past = series[split_time - 365:-365] + diff_moving_avg
 
 # Plot the results
 plot_series(time_valid, (x_valid, diff_moving_avg_plus_past))
+
+
+# -------------- Smoothing --------------
+
+# Smooth the original series before adding the time differenced moving average
+diff_moving_avg_plus_smooth_past = moving_average_forecast(series[split_time - 370:-359], 11) + diff_moving_avg
+
+# Plot the results
+plot_series(time_valid, (x_valid, diff_moving_avg_plus_smooth_past))
