@@ -91,18 +91,13 @@ x_valid = series[split_time:]
 # -------------- Naive Forecasting Method --------------
 naive_forecast = series[split_time - 1:-1]
 
-# Define time step
-time_step = 100
-
-# Print values
-print(f'ground truth at time step {time_step}: {x_valid[time_step]}')
-print(f'prediction at time step {time_step + 1}: {naive_forecast[time_step + 1]}')
+# Defin
 
 # Plot the results
-plot_series(time_valid, (x_valid, naive_forecast), title='Naive forecasting')
+#plot_series(time_valid, (x_valid, naive_forecast), title='Naive forecasting')
 
 # Zoomed-in
-plot_series(time_valid, (x_valid, naive_forecast), start=0, end=100, title='Naive forecasting')
+#plot_series(time_valid, (x_valid, naive_forecast), start=0, end=100, title='Naive forecasting')
 
 
 # -------------- Moving Avg Forecasting Method --------------
@@ -118,7 +113,7 @@ diff_series = (series[365:] - series[:-365])
 diff_time = time[365:]
 
 # Plot the results
-plot_series(diff_time, diff_series)
+#plot_series(diff_time, diff_series)
 
 # Generate moving average from the time differenced dataset
 diff_moving_avg = moving_average_forecast(diff_series, 30)
@@ -130,13 +125,13 @@ diff_moving_avg = diff_moving_avg[split_time - 365 - 30:]
 diff_series = diff_series[split_time - 365:]
 
 # Plot the results
-plot_series(time_valid, (diff_series, diff_moving_avg))
+#plot_series(time_valid, (diff_series, diff_moving_avg))
 
 # Add the trend and seasonality from the original series
 diff_moving_avg_plus_past = series[split_time - 365:-365] + diff_moving_avg
 
 # Plot the results
-plot_series(time_valid, (x_valid, diff_moving_avg_plus_past))
+#plot_series(time_valid, (x_valid, diff_moving_avg_plus_past))
 
 
 # -------------- Smoothing --------------
@@ -145,7 +140,7 @@ plot_series(time_valid, (x_valid, diff_moving_avg_plus_past))
 diff_moving_avg_plus_smooth_past = moving_average_forecast(series[split_time - 370:-359], 11) + diff_moving_avg
 
 # Plot the results
-plot_series(time_valid, (x_valid, diff_moving_avg_plus_smooth_past))
+#plot_series(time_valid, (x_valid, diff_moving_avg_plus_smooth_past))
 
 
 # -------------- Windowing and Feeding it to NN --------------
@@ -171,3 +166,16 @@ def windowed_dataset(series, window_size, batch_size, shuffle_buffer):
     
     return dataset
 
+
+# Parameters
+window_size = 20
+batch_size = 32
+shuffle_buffer_size = 1000
+dataset = windowed_dataset(x_train, window_size, batch_size, shuffle_buffer_size)
+
+# Print properties of a single batch
+for windows in dataset.take(1):
+  print(f'data type: {type(windows)}')
+  print(f'number of elements in the tuple: {len(windows)}')
+  print(f'shape of first element: {windows[0].shape}')
+  print(f'shape of second element: {windows[1].shape}')
