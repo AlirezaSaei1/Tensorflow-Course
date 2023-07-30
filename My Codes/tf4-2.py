@@ -29,6 +29,12 @@ dataset = dataset.flat_map(lambda window: window.batch(5))
 dataset = dataset.map(lambda window: (window[:-1], window[-1]))
 
 # Shuffle data 
-dataset_shuffled = dataset.shuffle
-for x, y in dataset_shuffled(buffer_size=10):
+dataset_shuffled = dataset.shuffle(buffer_size=10)
+for x, y in dataset_shuffled:
     print(x.numpy(), y.numpy())
+
+# Create batches of 2
+batch = dataset_shuffled.batch(2).prefetch(1)
+for x, y in batch:
+    print(f'x={x.numpy()}')
+    print(f'y={y.numpy()}')
