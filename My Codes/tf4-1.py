@@ -91,7 +91,12 @@ x_valid = series[split_time:]
 # -------------- Naive Forecasting Method --------------
 naive_forecast = series[split_time - 1:-1]
 
-# Defin
+# Define time step
+time_step = 100
+
+# Print values
+print(f'ground truth at time step {time_step}: {x_valid[time_step]}')
+print(f'prediction at time step {time_step + 1}: {naive_forecast[time_step + 1]}')
 
 # Plot the results
 #plot_series(time_valid, (x_valid, naive_forecast), title='Naive forecasting')
@@ -179,3 +184,36 @@ for windows in dataset.take(1):
   print(f'number of elements in the tuple: {len(windows)}')
   print(f'shape of first element: {windows[0].shape}')
   print(f'shape of second element: {windows[1].shape}')
+
+
+# -------------- 1-layer NN --------------
+# Build the single layer neural network
+l0 = tf.keras.layers.Dense(1, input_shape=[window_size])
+model = tf.keras.models.Sequential([l0])
+
+# Print the initial layer weights
+print("Layer weights: \n {} \n".format(l0.get_weights()))
+
+# Print the model summary
+model.summary()
+
+# Set the training parameters
+model.compile(loss="mse", optimizer=tf.keras.optimizers.SGD(learning_rate=1e-6, momentum=0.9))
+
+# Train the model
+model.fit(dataset,epochs=100)
+
+# Print the layer weights
+print("Layer weights {}".format(l0.get_weights()))
+
+# Shape of the first 20 data points slice
+print(f'shape of series[0:20]: {series[0:20].shape}')
+
+# Shape after adding a batch dimension
+print(f'shape of series[0:20][np.newaxis]: {series[0:20][np.newaxis].shape}')
+
+# Shape after adding a batch dimension (alternate way)
+print(f'shape of series[0:20][np.newaxis]: {np.expand_dims(series[0:20], axis=0).shape}')
+
+# Sample model prediction
+print(f'model prediction: {model.predict(series[0:20][np.newaxis])}')
