@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 
 # Function used for plotting
-def plot_series(time, series, format='-', start=0, end=None):
+def plot_series(time, series, format='-', start=0, end=None, title=''):
     plt.figure(figsize=(10, 6))
 
     if type(series) is tuple:
@@ -19,6 +19,7 @@ def plot_series(time, series, format='-', start=0, end=None):
     plt.xlabel('Time')
     plt.ylabel('Value')
     plt.grid(True)
+    plt.title(title)
     plt.show()
 
 
@@ -73,7 +74,7 @@ series = baseline + trend(time, slope) + seasonality(time, period=365, amplitude
 series += noise(time, noise_level, seed=42)
 
 # Plot the results
-plot_series(time, series)
+plot_series(time, series, title='Generated Series')
 
 # Define the split time
 split_time = 1000
@@ -87,8 +88,7 @@ time_valid = time[split_time:]
 x_valid = series[split_time:]
 
 
-# -------------- Forecasting --------------
-# Naive method
+# -------------- Naive Forecasting Method --------------
 naive_forecast = series[split_time - 1:-1]
 
 # Define time step
@@ -99,4 +99,41 @@ print(f'ground truth at time step {time_step}: {x_valid[time_step]}')
 print(f'prediction at time step {time_step + 1}: {naive_forecast[time_step + 1]}')
 
 # Plot the results
-plot_series(time_valid, (x_valid, naive_forecast))
+plot_series(time_valid, (x_valid, naive_forecast), title='Naive forecasting')
+
+# Zoomed-in
+plot_series(time_valid, (x_valid, naive_forecast), start=0, end=100, title='Naive forecasting')
+
+
+# -------------- Moving Avg Forecasting Method --------------
+moving_avg = moving_average_forecast(series, 30)[split_time - 30:]
+print(len(moving_avg))
+
+
+# -------------- Differencing Method --------------
+# Subtract the values at t-365 from original series
+diff_series = (series[365:] - series[:-365])
+
+# Truncate the first 365 time steps
+diff_time = time[365:]
+
+# Plot the results
+plot_series(diff_time, diff_series)
+
+# Generate moving average from the time differenced dataset
+diff_moving_avg = moving_average_forecast(diff_series, 30)
+
+# Slice the prediction points that corresponds to the validation set time steps
+diff_moving_avg = diff_moving_avg[split_time - 365 - 30:]
+
+# Slice the ground truth points that corresponds to the validation set time steps
+diff_series = diff_series[split_time - 365:]
+
+# Plot the results
+plot_series(time_valid, (diff_series, diff_moving_avg))
+
+# Add the trend and seasonality from the original series
+diff_moving_avg_plus_past = series[split_time - 365:-365] + diff_moving_avg
+
+# Plot the results
+plot_series(time_valid, (x_valid, diff_moving_avg_plus_past))
