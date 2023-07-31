@@ -257,6 +257,11 @@ model_tune = tf.keras.models.Sequential([
     tf.keras.layers.Dense(1)
 ])
 
+# IMPORTANT !!!
+# Set the learning rate scheduler
+lr_schedule = tf.keras.callbacks.LearningRateScheduler(
+    lambda epoch: 1e-8 * 10**(epoch / 20))
+
 # Initialize the optimizer
 optimizer = tf.keras.optimizers.SGD(momentum=0.9)
 
@@ -264,4 +269,4 @@ optimizer = tf.keras.optimizers.SGD(momentum=0.9)
 model_tune.compile(loss="mse", optimizer=optimizer)
 
 # Train the model
-history = model_tune.fit(dataset, epochs=100)
+history = model_tune.fit(dataset, epochs=100, callbacks=[lr_schedule])
