@@ -247,3 +247,21 @@ plot_series(time_valid, (x_valid, results))
 # Compute the metrics
 print(tf.keras.metrics.mean_squared_error(x_valid, results).numpy())
 print(tf.keras.metrics.mean_absolute_error(x_valid, results).numpy())
+
+
+# -------------- DNN --------------
+# Build the Model
+model_tune = tf.keras.models.Sequential([
+    tf.keras.layers.Dense(10, input_shape=[window_size], activation="relu"), 
+    tf.keras.layers.Dense(10, activation="relu"), 
+    tf.keras.layers.Dense(1)
+])
+
+# Initialize the optimizer
+optimizer = tf.keras.optimizers.SGD(momentum=0.9)
+
+# Set the training parameters
+model_tune.compile(loss="mse", optimizer=optimizer)
+
+# Train the model
+history = model_tune.fit(dataset, epochs=100)
