@@ -59,214 +59,214 @@ def moving_average_forecast(series, window_size):
         forecast.append(series[time:time + window_size].mean())
     return np.array(forecast)
 
+if __name__ == '__main__':
+    # Parameters
+    time = np.arange(4 * 365 + 1, dtype="float32")
+    baseline = 10
+    amplitude = 40
+    slope = 0.05
+    noise_level = 5
 
-# Parameters
-time = np.arange(4 * 365 + 1, dtype="float32")
-baseline = 10
-amplitude = 40
-slope = 0.05
-noise_level = 5
+    # Create the series
+    series = baseline + trend(time, slope) + seasonality(time, period=365, amplitude=amplitude)
 
-# Create the series
-series = baseline + trend(time, slope) + seasonality(time, period=365, amplitude=amplitude)
+    # Update with noise
+    series += noise(time, noise_level, seed=42)
 
-# Update with noise
-series += noise(time, noise_level, seed=42)
+    # Plot the results
+    plot_series(time, series, title='Generated Series')
 
-# Plot the results
-plot_series(time, series, title='Generated Series')
+    # Define the split time
+    split_time = 1000
 
-# Define the split time
-split_time = 1000
+    # Get the train set 
+    time_train = time[:split_time]
+    x_train = series[:split_time]
 
-# Get the train set 
-time_train = time[:split_time]
-x_train = series[:split_time]
-
-# Get the validation set
-time_valid = time[split_time:]
-x_valid = series[split_time:]
-
-
-# -------------- Naive Forecasting Method --------------
-naive_forecast = series[split_time - 1:-1]
-
-# Define time step
-time_step = 100
-
-# Print values
-print(f'ground truth at time step {time_step}: {x_valid[time_step]}')
-print(f'prediction at time step {time_step + 1}: {naive_forecast[time_step + 1]}')
-
-# Plot the results
-#plot_series(time_valid, (x_valid, naive_forecast), title='Naive forecasting')
-
-# Zoomed-in
-#plot_series(time_valid, (x_valid, naive_forecast), start=0, end=100, title='Naive forecasting')
+    # Get the validation set
+    time_valid = time[split_time:]
+    x_valid = series[split_time:]
 
 
-# -------------- Moving Avg Forecasting Method --------------
-moving_avg = moving_average_forecast(series, 30)[split_time - 30:]
-print(len(moving_avg))
+    # -------------- Naive Forecasting Method --------------
+    naive_forecast = series[split_time - 1:-1]
+
+    # Define time step
+    time_step = 100
+
+    # Print values
+    print(f'ground truth at time step {time_step}: {x_valid[time_step]}')
+    print(f'prediction at time step {time_step + 1}: {naive_forecast[time_step + 1]}')
+
+    # Plot the results
+    #plot_series(time_valid, (x_valid, naive_forecast), title='Naive forecasting')
+
+    # Zoomed-in
+    #plot_series(time_valid, (x_valid, naive_forecast), start=0, end=100, title='Naive forecasting')
 
 
-# -------------- Differencing Method --------------
-# Subtract the values at t-365 from original series
-diff_series = (series[365:] - series[:-365])
-
-# Truncate the first 365 time steps
-diff_time = time[365:]
-
-# Plot the results
-#plot_series(diff_time, diff_series)
-
-# Generate moving average from the time differenced dataset
-diff_moving_avg = moving_average_forecast(diff_series, 30)
-
-# Slice the prediction points that corresponds to the validation set time steps
-diff_moving_avg = diff_moving_avg[split_time - 365 - 30:]
-
-# Slice the ground truth points that corresponds to the validation set time steps
-diff_series = diff_series[split_time - 365:]
-
-# Plot the results
-#plot_series(time_valid, (diff_series, diff_moving_avg))
-
-# Add the trend and seasonality from the original series
-diff_moving_avg_plus_past = series[split_time - 365:-365] + diff_moving_avg
-
-# Plot the results
-#plot_series(time_valid, (x_valid, diff_moving_avg_plus_past))
+    # -------------- Moving Avg Forecasting Method --------------
+    moving_avg = moving_average_forecast(series, 30)[split_time - 30:]
+    print(len(moving_avg))
 
 
-# -------------- Smoothing --------------
+    # -------------- Differencing Method --------------
+    # Subtract the values at t-365 from original series
+    diff_series = (series[365:] - series[:-365])
 
-# Smooth the original series before adding the time differenced moving average
-diff_moving_avg_plus_smooth_past = moving_average_forecast(series[split_time - 370:-359], 11) + diff_moving_avg
+    # Truncate the first 365 time steps
+    diff_time = time[365:]
 
-# Plot the results
-#plot_series(time_valid, (x_valid, diff_moving_avg_plus_smooth_past))
+    # Plot the results
+    #plot_series(diff_time, diff_series)
 
+    # Generate moving average from the time differenced dataset
+    diff_moving_avg = moving_average_forecast(diff_series, 30)
 
-# -------------- Windowing and Feeding it to NN --------------
-def windowed_dataset(series, window_size, batch_size, shuffle_buffer):
+    # Slice the prediction points that corresponds to the validation set time steps
+    diff_moving_avg = diff_moving_avg[split_time - 365 - 30:]
 
-    # Generate a TF Dataset from the series values
-    dataset = tf.data.Dataset.from_tensor_slices(series)
-    
-    # Window the data but only take those with the specified size
-    dataset = dataset.window(window_size + 1, shift=1, drop_remainder=True)
-    
-    # Flatten the windows by putting its elements in a single batch
-    dataset = dataset.flat_map(lambda window: window.batch(window_size + 1))
+    # Slice the ground truth points that corresponds to the validation set time steps
+    diff_series = diff_series[split_time - 365:]
 
-    # Create tuples with features and labels 
-    dataset = dataset.map(lambda window: (window[:-1], window[-1]))
+    # Plot the results
+    #plot_series(time_valid, (diff_series, diff_moving_avg))
 
-    # Shuffle the windows
-    dataset = dataset.shuffle(shuffle_buffer)
-    
-    # Create batches of windows
-    dataset = dataset.batch(batch_size).prefetch(1)
-    
-    return dataset
+    # Add the trend and seasonality from the original series
+    diff_moving_avg_plus_past = series[split_time - 365:-365] + diff_moving_avg
+
+    # Plot the results
+    #plot_series(time_valid, (x_valid, diff_moving_avg_plus_past))
 
 
-# Parameters
-window_size = 20
-batch_size = 32
-shuffle_buffer_size = 1000
-dataset = windowed_dataset(x_train, window_size, batch_size, shuffle_buffer_size)
+    # -------------- Smoothing --------------
 
-# Print properties of a single batch
-for windows in dataset.take(1):
-  print(f'data type: {type(windows)}')
-  print(f'number of elements in the tuple: {len(windows)}')
-  print(f'shape of first element: {windows[0].shape}')
-  print(f'shape of second element: {windows[1].shape}')
+    # Smooth the original series before adding the time differenced moving average
+    diff_moving_avg_plus_smooth_past = moving_average_forecast(series[split_time - 370:-359], 11) + diff_moving_avg
+
+    # Plot the results
+    #plot_series(time_valid, (x_valid, diff_moving_avg_plus_smooth_past))
 
 
-# -------------- 1-layer NN --------------
-# Build the single layer neural network
-l0 = tf.keras.layers.Dense(1, input_shape=[window_size])
-model = tf.keras.models.Sequential([l0])
+    # -------------- Windowing and Feeding it to NN --------------
+    def windowed_dataset(series, window_size, batch_size, shuffle_buffer):
 
-# Print the initial layer weights
-print("Layer weights: \n {} \n".format(l0.get_weights()))
+        # Generate a TF Dataset from the series values
+        dataset = tf.data.Dataset.from_tensor_slices(series)
+        
+        # Window the data but only take those with the specified size
+        dataset = dataset.window(window_size + 1, shift=1, drop_remainder=True)
+        
+        # Flatten the windows by putting its elements in a single batch
+        dataset = dataset.flat_map(lambda window: window.batch(window_size + 1))
 
-# Print the model summary
-model.summary()
+        # Create tuples with features and labels 
+        dataset = dataset.map(lambda window: (window[:-1], window[-1]))
 
-# Set the training parameters
-model.compile(loss="mse", optimizer=tf.keras.optimizers.SGD(learning_rate=1e-6, momentum=0.9))
-
-# Train the model
-model.fit(dataset,epochs=100)
-
-# Print the layer weights
-print("Layer weights {}".format(l0.get_weights()))
-
-# Shape of the first 20 data points slice
-print(f'shape of series[0:20]: {series[0:20].shape}')
-
-# Shape after adding a batch dimension
-print(f'shape of series[0:20][np.newaxis]: {series[0:20][np.newaxis].shape}')
-
-# Shape after adding a batch dimension (alternate way)
-print(f'shape of series[0:20][np.newaxis]: {np.expand_dims(series[0:20], axis=0).shape}')
-
-# Sample model prediction
-print(f'model prediction: {model.predict(series[0:20][np.newaxis])}')
+        # Shuffle the windows
+        dataset = dataset.shuffle(shuffle_buffer)
+        
+        # Create batches of windows
+        dataset = dataset.batch(batch_size).prefetch(1)
+        
+        return dataset
 
 
-# -------------- Forecasting --------------
-# Initialize a list
-forecast = []
+    # Parameters
+    window_size = 20
+    batch_size = 32
+    shuffle_buffer_size = 1000
+    dataset = windowed_dataset(x_train, window_size, batch_size, shuffle_buffer_size)
 
-# Use the model to predict data points per window size
-for time in range(len(series) - window_size):
-  forecast.append(model.predict(series[time:time + window_size][np.newaxis]))
-
-# Slice the points that are aligned with the validation set
-forecast = forecast[split_time - window_size:]
-
-# Compare number of elements in the predictions and the validation set
-print(f'length of the forecast list: {len(forecast)}')
-print(f'shape of the validation set: {x_valid.shape}')
-
-# Preview shapes after using the conversion and squeeze methods
-print(f'shape after converting to numpy array: {np.array(forecast).shape}')
-print(f'shape after squeezing: {np.array(forecast).squeeze().shape}')
-
-# Convert to a numpy array and drop single dimensional axes
-results = np.array(forecast).squeeze()
-
-# Overlay the results with the validation set
-plot_series(time_valid, (x_valid, results))
-
-# Compute the metrics
-print(tf.keras.metrics.mean_squared_error(x_valid, results).numpy())
-print(tf.keras.metrics.mean_absolute_error(x_valid, results).numpy())
+    # Print properties of a single batch
+    for windows in dataset.take(1):
+        print(f'data type: {type(windows)}')
+        print(f'number of elements in the tuple: {len(windows)}')
+        print(f'shape of first element: {windows[0].shape}')
+        print(f'shape of second element: {windows[1].shape}')
 
 
-# -------------- DNN --------------
-# Build the Model
-model_tune = tf.keras.models.Sequential([
-    tf.keras.layers.Dense(10, input_shape=[window_size], activation="relu"), 
-    tf.keras.layers.Dense(10, activation="relu"), 
-    tf.keras.layers.Dense(1)
-])
+    # -------------- 1-layer NN --------------
+    # Build the single layer neural network
+    l0 = tf.keras.layers.Dense(1, input_shape=[window_size])
+    model = tf.keras.models.Sequential([l0])
 
-# IMPORTANT !!!
-# Set the learning rate scheduler
-lr_schedule = tf.keras.callbacks.LearningRateScheduler(
-    lambda epoch: 1e-8 * 10**(epoch / 20))
+    # Print the initial layer weights
+    print("Layer weights: \n {} \n".format(l0.get_weights()))
 
-# Initialize the optimizer
-optimizer = tf.keras.optimizers.SGD(momentum=0.9)
+    # Print the model summary
+    model.summary()
 
-# Set the training parameters
-model_tune.compile(loss="mse", optimizer=optimizer)
+    # Set the training parameters
+    model.compile(loss="mse", optimizer=tf.keras.optimizers.SGD(learning_rate=1e-6, momentum=0.9))
 
-# Train the model
-history = model_tune.fit(dataset, epochs=100, callbacks=[lr_schedule])
+    # Train the model
+    model.fit(dataset,epochs=100)
+
+    # Print the layer weights
+    print("Layer weights {}".format(l0.get_weights()))
+
+    # Shape of the first 20 data points slice
+    print(f'shape of series[0:20]: {series[0:20].shape}')
+
+    # Shape after adding a batch dimension
+    print(f'shape of series[0:20][np.newaxis]: {series[0:20][np.newaxis].shape}')
+
+    # Shape after adding a batch dimension (alternate way)
+    print(f'shape of series[0:20][np.newaxis]: {np.expand_dims(series[0:20], axis=0).shape}')
+
+    # Sample model prediction
+    print(f'model prediction: {model.predict(series[0:20][np.newaxis])}')
+
+
+    # -------------- Forecasting --------------
+    # Initialize a list
+    forecast = []
+
+    # Use the model to predict data points per window size
+    for time in range(len(series) - window_size):
+        forecast.append(model.predict(series[time:time + window_size][np.newaxis]))
+
+    # Slice the points that are aligned with the validation set
+    forecast = forecast[split_time - window_size:]
+
+    # Compare number of elements in the predictions and the validation set
+    print(f'length of the forecast list: {len(forecast)}')
+    print(f'shape of the validation set: {x_valid.shape}')
+
+    # Preview shapes after using the conversion and squeeze methods
+    print(f'shape after converting to numpy array: {np.array(forecast).shape}')
+    print(f'shape after squeezing: {np.array(forecast).squeeze().shape}')
+
+    # Convert to a numpy array and drop single dimensional axes
+    results = np.array(forecast).squeeze()
+
+    # Overlay the results with the validation set
+    plot_series(time_valid, (x_valid, results))
+
+    # Compute the metrics
+    print(tf.keras.metrics.mean_squared_error(x_valid, results).numpy())
+    print(tf.keras.metrics.mean_absolute_error(x_valid, results).numpy())
+
+
+    # -------------- DNN --------------
+    # Build the Model
+    model_tune = tf.keras.models.Sequential([
+        tf.keras.layers.Dense(10, input_shape=[window_size], activation="relu"), 
+        tf.keras.layers.Dense(10, activation="relu"), 
+        tf.keras.layers.Dense(1)
+    ])
+
+    # IMPORTANT !!!
+    # Set the learning rate scheduler
+    lr_schedule = tf.keras.callbacks.LearningRateScheduler(
+        lambda epoch: 1e-8 * 10**(epoch / 20))
+
+    # Initialize the optimizer
+    optimizer = tf.keras.optimizers.SGD(momentum=0.9)
+
+    # Set the training parameters
+    model_tune.compile(loss="mse", optimizer=optimizer)
+
+    # Train the model
+    history = model_tune.fit(dataset, epochs=100, callbacks=[lr_schedule])
