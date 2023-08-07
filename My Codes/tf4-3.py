@@ -40,9 +40,12 @@ shuffle_buffer_size = 1000
 dataset = tf4_1.windowed_dataset(x_train, window_size, batch_size, shuffle_buffer_size)
 
 # Model with Simple RNN
+# Default activation layer in RNNs are tanh
 model = tf.keras.models.Sequential([
+    tf.keras.layers.Lambda(lambda x: tf.expand_dims(x, axis=-1), input_shape=[None]),
     tf.keras.layers.SimpleRNN(20, return_sequences=True, input_shape=[None, 1]), # 1 for univariate
     tf.keras.layers.SimpleRNN(20),
-    tf.keras.layers.Dense(1)
+    tf.keras.layers.Dense(1),
+    tf.keras.layers.Lambda(lambda x: x * 100.0)
 ])
 
