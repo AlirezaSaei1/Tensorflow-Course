@@ -39,3 +39,10 @@ shuffle_buffer_size = 1000
 
 dataset = tf4_1.windowed_dataset(x_train, window_size, batch_size, shuffle_buffer_size)
 
+# Model with Simple RNN
+model = tf.keras.models.Sequential([
+    tf.keras.layers.SimpleRNN(20, return_sequences=True, input_shape=[None, 1]), # 1 for univariate
+    tf.keras.layers.SimpleRNN(20),
+    tf.keras.layers.Dense(1)
+])
+
