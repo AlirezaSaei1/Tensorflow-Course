@@ -59,6 +59,30 @@ def moving_average_forecast(series, window_size):
         forecast.append(series[time:time + window_size].mean())
     return np.array(forecast)
 
+
+def windowed_dataset(series, window_size, batch_size, shuffle_buffer):
+
+    # Generate a TF Dataset from the series values
+    dataset = tf.data.Dataset.from_tensor_slices(series)
+        
+    # Window the data but only take those with the specified size
+    dataset = dataset.window(window_size + 1, shift=1, drop_remainder=True)
+        
+    # Flatten the windows by putting its elements in a single batch
+    dataset = dataset.flat_map(lambda window: window.batch(window_size + 1))
+
+    # Create tuples with features and labels 
+    dataset = dataset.map(lambda window: (window[:-1], window[-1]))
+
+    # Shuffle the windows
+    dataset = dataset.shuffle(shuffle_buffer)
+        
+    # Create batches of windows
+    dataset = dataset.batch(batch_size).prefetch(1)
+        
+    return dataset
+
+
 if __name__ == '__main__':
     # Parameters
     time = np.arange(4 * 365 + 1, dtype="float32")
@@ -149,29 +173,6 @@ if __name__ == '__main__':
 
 
     # -------------- Windowing and Feeding it to NN --------------
-    def windowed_dataset(series, window_size, batch_size, shuffle_buffer):
-
-        # Generate a TF Dataset from the series values
-        dataset = tf.data.Dataset.from_tensor_slices(series)
-        
-        # Window the data but only take those with the specified size
-        dataset = dataset.window(window_size + 1, shift=1, drop_remainder=True)
-        
-        # Flatten the windows by putting its elements in a single batch
-        dataset = dataset.flat_map(lambda window: window.batch(window_size + 1))
-
-        # Create tuples with features and labels 
-        dataset = dataset.map(lambda window: (window[:-1], window[-1]))
-
-        # Shuffle the windows
-        dataset = dataset.shuffle(shuffle_buffer)
-        
-        # Create batches of windows
-        dataset = dataset.batch(batch_size).prefetch(1)
-        
-        return dataset
-
-
     # Parameters
     window_size = 20
     batch_size = 32
