@@ -63,7 +63,6 @@ model_tune = tf.keras.models.Sequential([
 ])
 # ------------------------------------------------------------------------------------------------
 
-
 lr_schedule = tf.keras.callbacks.LearningRateScheduler(lambda epoch: 1e-8 * 10**(epoch / 20))
 
 # The Huber loss is the convolution of the absolute value function with the rectangular function, scaled and translated. 
