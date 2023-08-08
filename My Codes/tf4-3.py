@@ -39,6 +39,7 @@ shuffle_buffer_size = 1000
 
 dataset = tf4_1.windowed_dataset(x_train, window_size, batch_size, shuffle_buffer_size)
 
+
 # Model with Simple RNN
 # Default activation layer in RNNs are tanh
 model = tf.keras.models.Sequential([
@@ -49,11 +50,26 @@ model = tf.keras.models.Sequential([
     tf.keras.layers.Lambda(lambda x: x * 100.0)
 ])
 
+
+# Model with LSTM
+# ------------------------------------------------------------------------------------------------
+model_tune = tf.keras.models.Sequential([
+  tf.keras.layers.Lambda(lambda x: tf.expand_dims(x, axis=-1),
+                      input_shape=[window_size]),
+    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(32, return_sequences=True)),
+  tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(32)),
+  tf.keras.layers.Dense(1),
+  tf.keras.layers.Lambda(lambda x: x * 100.0)
+])
+# ------------------------------------------------------------------------------------------------
+
+
 lr_schedule = tf.keras.callbacks.LearningRateScheduler(lambda epoch: 1e-8 * 10**(epoch / 20))
 
+# The Huber loss is the convolution of the absolute value function with the rectangular function, scaled and translated. 
 model.compile(loss=tf.keras.losses.Huber(),
               optimizer=tf.keras.optimizers.SGD(learning_rate=1e-8, momentum=0.9),
-              metrics=['accuracy'])
+              metrics=['mae'])
 
 x_train = []
 history = model.fit(x_train, epochs=19, callbacks=[lr_schedule])
