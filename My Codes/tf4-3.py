@@ -49,3 +49,5 @@ model = tf.keras.models.Sequential([
     tf.keras.layers.Lambda(lambda x: x * 100.0)
 ])
 
+lr_schedule = tf.keras.callbacks.LearningRateScheduler(lambda epoch: 1e-8 * 10**(epoch / 20))
+
