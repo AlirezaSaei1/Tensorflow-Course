@@ -51,3 +51,9 @@ model = tf.keras.models.Sequential([
 
 lr_schedule = tf.keras.callbacks.LearningRateScheduler(lambda epoch: 1e-8 * 10**(epoch / 20))
 
+model.compile(loss=tf.keras.losses.Huber(),
+              optimizer=tf.keras.optimizers.SGD(learning_rate=1e-8, momentum=0.9),
+              metrics=['accuracy'])
+
+x_train = []
+history = model.fit(x_train, epochs=19, callbacks=[lr_schedule])
