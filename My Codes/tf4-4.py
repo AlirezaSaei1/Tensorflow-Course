@@ -22,3 +22,17 @@ time = np.array(time_step)
 # Plot the data
 plt.plot(time, series)
 plt.show()
+
+
+# Data split
+split_time = 1000
+time_train = time[:split_time]
+x_train = series[:split_time]
+time_valid = time[split_time:]
+x_valid = series[split_time:]
+
+
+# Variables
+window_size = 20
+batch_size = 32
+shuffle_buffer_size = 1000
