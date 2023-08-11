@@ -67,8 +67,9 @@ model_tune = tf.keras.models.Sequential([
 # Model with Conv1D
 # ------------------------------------------------------------------------------------------------
 model_tune = tf.keras.models.Sequential([
+  # spikes and instability in learning rates are due to batch size
   tf.keras.layers.Conv1D(filters=32, kernel_size=5, strides=1, 
-                          padding='casual', activation='relu', 
+                         padding='casual', activation='relu', 
                          input_shape=[None, 1]),
   tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(32, return_sequences=True)),
   tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(32)),
