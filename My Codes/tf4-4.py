@@ -59,10 +59,21 @@ tf.keras.backend.clear_session()
 
 # Build the Model
 model = tf.keras.models.Sequential([
-    tf.keras.layers.Dense(30, input_shape=[window_size], activation="relu"), 
-    tf.keras.layers.Dense(10, activation="relu"),
-    tf.keras.layers.Dense(1)
+  tf.keras.layers.Conv1D(filters=64, kernel_size=3,
+                      strides=1,
+                      activation="relu",
+                      padding='causal',
+                      input_shape=[window_size, 1]),
+  tf.keras.layers.LSTM(64, return_sequences=True),
+  tf.keras.layers.LSTM(64),
+  tf.keras.layers.Dense(30, activation="relu"),
+  tf.keras.layers.Dense(10, activation="relu"),
+  tf.keras.layers.Dense(1),
+  tf.keras.layers.Lambda(lambda x: x * 400)
 ])
+
+ # Print the model summary 
+model.summary()
 
 # Set the learning rate
 learning_rate = 2e-5
