@@ -1,6 +1,6 @@
 import csv
 import numpy as np
-
+import matplotlib.pyplot as plt
 time_step = []
 sunspots = []
 
@@ -17,3 +17,8 @@ with open('TimeSeries/Sunspots.csv') as f:
 # so it is better to first create a throwaway list then convert it to numpy arrays
 series = np.array(sunspots)
 time = np.array(time_step)
+
+
+# Plot the data
+plt.plot(time, series)
+plt.show()
