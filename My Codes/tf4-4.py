@@ -76,8 +76,8 @@ model = tf.keras.models.Sequential([
 model.summary()
 
 # Set the learning rate
-learning_rate = 2e-5
-
+learning_rate = 1e-8
+lr_scheduler = tf.keras.callbacks.LearningRateScheduler(lambda epoch: 1e-8 * 10 ** (epoch / 20))
 # Set the optimizer 
 optimizer = tf.keras.optimizers.SGD(learning_rate=learning_rate, momentum=0.9)
 
@@ -87,5 +87,5 @@ model.compile(loss=tf.keras.losses.Huber(),
               metrics=["mae"])
 
 # Train the model
-history = model.fit(x_train ,epochs=100)
+history = model.fit(x_train ,epochs=100, callbacks=[lr_scheduler])
 
