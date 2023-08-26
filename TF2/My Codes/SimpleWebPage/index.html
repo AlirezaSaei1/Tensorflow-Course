@@ -2,6 +2,10 @@
     <head></head>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
     <script lang="js">
+        doTraining(model).then(() => {
+            alert(model.predict(tf.tensor2d([10], [1, 1])));   
+        });
+        
         const model = tf.sequential();
         model.add(tf.layers.dense({units: 1, inputShape: [1]}));
         model.compile({loss: 'meanSquaredError', optimizer: 'sgd'});
