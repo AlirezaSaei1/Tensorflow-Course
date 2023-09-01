@@ -8,7 +8,7 @@
         }
         
         
-        const csvURL = 'iris.csv';
+        const csvURL = "iris.csv";
             const trainingData = tf.data.csv(csvURL, {
                 columnConfig: {
                     species: {
@@ -17,7 +17,8 @@
                 }
             });
             
-        const convertData = 
+        
+        const convertedData = 
                   trainingData.map(({xs, ys}) => {
                       const labels = [
                           ys.species = "setosa" ? 1 : 0,
@@ -30,10 +31,27 @@
         }).batch(10);
         
         
+        const numOfFeatures = 4;
         const model = tf.sequential();
-        model.add(tf.layers.dense({units: 1, inputShape: [1]}));
-        model.compile({loss: 'meanSquaredError', optimizer: 'sgd'});
+        
+        model.add(tf.layers.dense({
+            inputShape: [numOfFeatures],
+            units: 5, 
+            activation = "sigmoid"
+        }));
+        
+        model.add(tf.layers.dense({
+            units: 3,
+            activation: "softmax"
+        }));
+        
+        model.compile({
+            loss: "categoricalCrossentropy",
+            optimizer: tf.training.adam(0.06)
+        });
+        
         model.summary();
+
 
     </script>
     <body>
