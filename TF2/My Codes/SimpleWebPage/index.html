@@ -19,6 +19,17 @@
                         });
         }
         
+        async function run() {
+            const csvURL = 'iris.csv';
+            const trainingData = tf.data.csv(csvURL, {
+                columnConfig: {
+                    species: {
+                        isLabel: true
+                    }
+                }
+            });
+        }
+        
         const model = tf.sequential();
         model.add(tf.layers.dense({units: 1, inputShape: [1]}));
         model.compile({loss: 'meanSquaredError', optimizer: 'sgd'});
