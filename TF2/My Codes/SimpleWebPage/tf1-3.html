@@ -1,21 +1,29 @@
 <html>
 <head></head>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis"></script>
     <script lang="js">
         
-        async function run(){
-            model = tf.Sequential();
-            model.add(tf.layers.conv2d({inputShape: [28, 28, 1], kernelSize: 3, filters: 8, activation: 'relu'}));
-            model.add(tf.layers.maxPooling2d({poolSize: [2, 2]}));
-            model.add(tf.layers.conv2d({filters: 16, kernelSize: 3, activation: 'relu'}));
-            model.add(tf.layers.maxPooling2d({poolSize: [2, 2]}));
-            
-            model.add(tf.layers.flatten());
-            
-            model.add(tf.layers.dense({units: 128, activation: 'relu'}));
-            model.add(tf.layers.dense({units: 10, activation: 'softmax'}));
-        }
-        run();
+    function getModel() {
+        model = tf.sequential();
+
+        model.add(tf.layers.conv2d({inputShape: [28, 28, 1], kernelSize: 3, filters: 8, activation: 'relu'}));
+        model.add(tf.layers.maxPooling2d({poolSize: [2, 2]}));
+        model.add(tf.layers.conv2d({filters: 16, kernelSize: 3, activation: 'relu'}));
+        model.add(tf.layers.maxPooling2d({poolSize: [2, 2]}));
+        model.add(tf.layers.flatten());
+        model.add(tf.layers.dense({units: 128, activation: 'relu'}));
+        model.add(tf.layers.dense({units: 10, activation: 'softmax'}));
+
+        model.compile({
+            optimizer: tf.train.adam(),
+            loss: 'categoricalCrossentropy',
+            metrics: ['accuracy']
+        });
+
+        return model;
+    }
+
     </script>
 <body>
 </body>
