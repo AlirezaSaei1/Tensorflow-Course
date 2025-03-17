@@ -1,2 +1,2 @@
 # Tensorflow-Course
-Tensorflow Rocks!
+3 Tensorflow Specializations from DeepLearning.AI / Coursera!
